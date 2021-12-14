@@ -38,6 +38,7 @@ import android.text.TextUtils;
 import android.text.method.MovementMethod;
 import android.text.method.TransformationMethod;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -51,7 +52,9 @@ import androidx.annotation.Nullable;
 import androidx.annotation.Px;
 import androidx.appcompat.widget.AppCompatEditText;
 import androidx.core.content.res.ResourcesCompat;
+import androidx.core.graphics.ColorUtils;
 import androidx.core.view.ViewCompat;
+import androidx.interpolator.view.animation.FastOutSlowInInterpolator;
 
 /**
  * Provides a widget for enter PIN/OTP/password etc.
@@ -70,6 +73,9 @@ public class PinView extends AppCompatEditText {
     private static final int DEFAULT_COUNT = 4;
 
     private static final InputFilter[] NO_FILTERS = new InputFilter[0];
+
+    private static final int[] FILLED_STATES = new int[]{
+            android.R.attr.state_checked};
 
     private static final int[] HIGHLIGHT_STATES = new int[]{
             android.R.attr.state_selected};
@@ -370,6 +376,11 @@ public class PinView extends AppCompatEditText {
         for (int i = 0; i < mPinItemCount; i++) {
             boolean highlight = isFocused() && highlightIdx == i;
             mPaint.setColor(highlight ? getLineColorForState(HIGHLIGHT_STATES) : mCurLineColor);
+
+            boolean filled = i < highlightIdx;
+            if (filled && mLineColor != null && mLineColor.getColorForState(FILLED_STATES, mLineColor.getDefaultColor()) != mLineColor.getDefaultColor()) {
+                mPaint.setColor(getLineColorForState(FILLED_STATES));
+            }
 
             updateItemRectF(i);
             updateCenterPoint();
@@ -901,6 +912,7 @@ public class PinView extends AppCompatEditText {
     }
 
     //region ItemBackground
+
     /**
      * Set the item background to a given resource. The resource should refer to
      * a Drawable object or 0 to remove the item background.
